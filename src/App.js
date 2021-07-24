@@ -1,10 +1,11 @@
 import './App.css';
 import Dashboard from './pages/Dashboard';
-
+import { MetaMaskProvider, useMetaMask } from "metamask-react";
 function App() {
   return (
     <div className="App">
-      <Dashboard></Dashboard>
+          <MetaMaskProvider><Dashboard/></MetaMaskProvider>
+      
     </div>
   );
 }

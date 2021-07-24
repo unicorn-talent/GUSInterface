@@ -1,12 +1,13 @@
-import React from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import { makeStyles} from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
-import Button from '@material-ui/core/Button';
+import {Button, TextField} from '@material-ui/core';
 import HelpOutlinedIcon from '@material-ui/icons/HelpOutlined';
 import ReactApexChart from 'react-apexcharts';
 import Tooltip from '@material-ui/core/Tooltip';
+import { MetaMaskProvider, useMetaMask } from "metamask-react";
 
 import toon from '../assets/images/toon.png';
 import img1 from '../assets/images/blob1.png';
@@ -19,6 +20,8 @@ import img7 from '../assets/images/blob7.png';
 import '../css/dashboard.css'
 import { green } from '@material-ui/core/colors';
 
+import {getInfo, writeRebase} from '../Gus/gus';
+import { ethers } from 'ethers';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -75,7 +78,32 @@ const useStylesToolip = makeStyles((theme) => ({
   },
 }));
 
-export default function Dashboard() {
+let initial_flag = 0;
+
+
+function useInterval(callback, delay) {
+  const savedCallback = useRef();
+
+  // Remember the latest function.
+  useEffect(() => {
+    savedCallback.current = callback;
+  }, [callback]);
+
+  // Set up the interval.
+  useEffect(() => {
+    function tick() {
+      savedCallback.current();
+    }
+    if (delay !== null) {
+      let id = setInterval(tick, delay);
+      return () => clearInterval(id);
+    }
+  }, [delay]);
+}
+
+
+
+const Dashboard = () => {
   const classes = useStyles();
   const tooltipClasses = useStylesToolip();
   
@@ -114,42 +142,81 @@ export default function Dashboard() {
     }
   };
 
-  var transactions=[
-    {
-      addr: '0xd8de267a237a1445e881575156bf6e92ea1b935f2c0021220891ff93d015dc1e',
-      datetime: '7/18, 8:35 AM'
-    },
-    {
-      addr: '0xd8de267a237a1445e881575156bf6e92ea1b935f2c0021220891ff93d015dc1e',
-      datetime: '7/18, 8:35 AM'
-    },
-    {
-      addr: '0xd8de267a237a1445e881575156bf6e92ea1b935f2c0021220891ff93d015dc1e',
-      datetime: '7/18, 8:35 AM'
-    },
-    {
-      addr: '0xd8de267a237a1445e881575156bf6e92ea1b935f2c0021220891ff93d015dc1e',
-      datetime: '7/18, 8:35 AM'
-    },
-    {
-      addr: '0xd8de267a237a1445e881575156bf6e92ea1b935f2c0021220891ff93d015dc1e',
-      datetime: '7/18, 8:35 AM'
-    },
-    {
-      addr: '0xd8de267a237a1445e881575156bf6e92ea1b935f2c0021220891ff93d015dc1e',
-      datetime: '7/18, 8:35 AM'
-    },
-    {
-      addr: '0xd8de267a237a1445e881575156bf6e92ea1b935f2c0021220891ff93d015dc1e',
-      datetime: '7/18, 8:35 AM'
-    },
-    {
-      addr: '0xd8de267a237a1445e881575156bf6e92ea1b935f2c0021220891ff93d015dc1e',
-      datetime: '7/18, 8:35 AM'
+  const { status, connect, account  } = useMetaMask ();
+  const [rebase, setRebase] = useState("");
+  const [rebaseTime, setRebaseTime] = useState(0);
+  const [currentPeg, setCurrentPeg] = useState(0);
+  const [oraclePrice, setOraclePrice] = useState(0);
+  const [totalSupply, setTotalSupply] = useState(0);
+  const [supplyDelta, setSupplyDelta] = useState(0);
+  const [myaddress, setMyaddress] = useState("");
+  const [holdings, setHoldings] = useState("");
+  const [transactions, setTransactions] = useState([]);
+  
+  useEffect(() => {
+    fetch('https://api.bscscan.com/api?module=account&action=txlist&address=0x4ca2679f6518693213b646c29ef149e0707123b9&apikey=T8X5MHYDFRQJTSIUG58UBY3Y6Y8AI8R6QG&startBlock=9409241')
+      .then(response => response.json())
+      .then(data => {
+        setTransactions(data.result);
+      });
+
+    console.log(status);
+    if (status == "notConnected") setHoldings(<Button variant="contained" className={classes.button} onClick={connect}>Connet Wallet</Button>)
+    else  if (status == 'connected') setMyaddress(account);
+
+  },[status, holdings, myaddress]);
+  
+
+  const rebaseTimeCallback = (timestamp) => {    
+    setRebaseTime(timestamp);
+  }
+
+  const rebaseValueCallback = (rebase_val) => {
+    // console.log("rebase0:" + rebase_val[0].toString());
+    
+    // console.log("rebase1:" + rebase_val[1].toString());
+    setSupplyDelta(Math.round(ethers.utils.formatEther(rebase_val[1].toString())));
+  }
+
+  const targetRateCallback = (target_rate) => {
+    setCurrentPeg(Math.round(ethers.utils.formatEther(target_rate.toString())/21*20));
+  }
+
+  const dataCallback = (data) => {
+    setOraclePrice(Math.round(ethers.utils.formatEther(data.toString())));
+  }
+
+  const totalSupplyCallback = (total_supply) => {
+    setTotalSupply(parseInt(total_supply) / Math.pow(10,9));
+  }
+
+  const balanceOfCallback = (balance) => {
+    setHoldings(balance.toString()); 
+  }
+
+  const rebaseTimeCalc = () => 
+  {
+    const currentTime = (new Date()).getTime() / 1000;
+    setRebase();
+    if (rebaseTime != 0 && rebaseTime - currentTime > 0) {
+      const hour = Math.floor((rebaseTime - currentTime) / 3600);
+      const minute = Math.floor(((rebaseTime - currentTime) % 3600) / 60);
+      const second = Math.floor((rebaseTime - currentTime) % 60);
+      const ret = hour + "h:" + minute + "m:" + second + "s";
+      setRebase(ret)
+    }else if (rebaseTime - currentTime < 0) {
+      setRebase(<Button variant="contained" className={classes.button} onClick={writeRebase}>Rebase</Button>)
     }
-  ];
+  }
+
+  useInterval(() => {
+    rebaseTimeCalc(); 
+    getInfo(rebaseTimeCallback, rebaseValueCallback, targetRateCallback, dataCallback, totalSupplyCallback, balanceOfCallback, myaddress);
+  }, 1000);
 
   return (
+
+
     <div className="dashboard">
       <h1 style={{color: 'white'}}>GUS Dashboard</h1>
       <Grid container spacing={2}>
@@ -173,8 +240,8 @@ export default function Dashboard() {
                   <div className={classes.card_font} style={{ color: '#3B82F6'}}>
                     Rebase Status
                   </div>
-                  <div>
-                    <Button variant="contained" className={classes.button}>Rebase</Button>
+                  <div className={classes.text}>
+                    {rebase}
                   </div>              
                 </CardContent>
               </Card>
@@ -195,7 +262,7 @@ export default function Dashboard() {
                     Current Peg
                   </div>
                   <div className={classes.text}>
-                    <span>$34386</span>
+                    <span>${currentPeg}</span>
                   </div>
                 </CardContent>
               </Card>
@@ -213,7 +280,7 @@ export default function Dashboard() {
                     Oracle Price
                   </div>
                   <div className={classes.text}>
-                    <span>$61782</span>
+                    <span>${oraclePrice}</span>
                   </div>
                 </CardContent>
               </Card>
@@ -231,7 +298,7 @@ export default function Dashboard() {
                     Market Cap
                   </div>
                   <div className={classes.text}>
-                    <span>$641,530</span>
+                    <span>${Math.round(oraclePrice*totalSupply)}</span>
                   </div>
                 </CardContent>
               </Card>
@@ -249,7 +316,7 @@ export default function Dashboard() {
                     Total Supply
                   </div>
                   <div className={classes.text}>
-                    <span>10</span>
+                    <span>{Math.round(totalSupply)}</span>
                   </div>
                 </CardContent>
               </Card>
@@ -266,8 +333,8 @@ export default function Dashboard() {
                   <div className={classes.card_font} style={{ color: '#53ca42'}}>
                     My Holdings
                   </div>
-                  <div>
-                    <Button variant="contained" className={classes.button}>Connet Wallet</Button>
+                  <div className={classes.text}>
+                    {holdings}
                   </div>              
                 </CardContent>
               </Card>
@@ -285,7 +352,7 @@ export default function Dashboard() {
                     Expected Supply Delta
                   </div>
                   <div className={classes.text}>
-                    <span>0</span>
+                    <span>{supplyDelta}</span>
                   </div>
                 </CardContent>
               </Card>
@@ -310,10 +377,10 @@ export default function Dashboard() {
             <div key={index} style={{marginTop: '35px'}}>
               <div>
                 <span><b>{index+1}</b></span>&nbsp;&nbsp;&nbsp;
-                <a className={classes.addr} href={"https://bscscan.com/tx/" + trans.addr} target="_blank">{trans.addr}</a>
+                <a className={classes.addr} href={"https://bscscan.com/tx/" + trans.hash} target="_blank">{trans.hash}</a>
               </div>
               <div style={{paddingLeft: '30px', color:'rgba(55,65,81,1)'}}>
-                <span>{trans.datetime}</span>
+                <span>{trans.timeStamp}</span>
               </div>
             </div>
           ) )}
@@ -322,3 +389,5 @@ export default function Dashboard() {
     </div>
   );
 }
+
+export default Dashboard;
