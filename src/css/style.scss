@@ -1,0 +1,132 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&display=fallback');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+// Additional styles
+// Typography
+.h1 {
+    @apply text-4xl font-extrabold leading-tight tracking-tighter;
+}
+
+.h2 {
+    @apply text-3xl font-extrabold leading-tight tracking-tighter;
+}
+
+.h3 {
+    @apply text-3xl font-bold leading-tight;
+}
+
+.h4 {
+    @apply text-2xl font-bold leading-snug tracking-tight;
+}
+
+@screen md {
+    .h1 {
+        @apply text-5xl;
+    }
+
+    .h2 {
+        @apply text-4xl;
+    }
+}
+
+// Buttons
+.btn,
+.btn-sm {
+    @apply font-medium inline-flex items-center justify-center rounded leading-snug transition duration-150 ease-in-out;
+}
+
+.btn {
+    @apply px-8 py-3 shadow-lg;
+}
+
+.btn-sm {
+    @apply px-4 py-2 shadow;
+}
+
+
+@import 'additional-styles/theme.scss';
+
+// Additional Tailwind directives: https://tailwindcss.com/docs/functions-and-directives/#responsive
+@responsive {
+    .rtl {
+        direction: rtl;
+    }
+}
+
+// See Alpine.js: https://github.com/alpinejs/alpine#x-cloak
+[x-cloak] {
+    display: none;
+}
+
+// AOS styles
+$aos-distance: 10px;
+@import 'node_modules/aos/src/sass/aos.scss';
+
+body {
+	background: rgb(251,207,89);
+	background: linear-gradient(133deg, rgba(251,207,89,1) 50%, #53ca42 100%);
+}
+
+button {
+	border: none;
+}
+
+button:focus, a:focus {
+    outline: none;
+}
+
+.buy {
+	background: #53ca42;
+
+	&:hover {
+		background: #55a630;
+	}
+}
+
+.rainbow-animated {
+	background: linear-gradient(to right, #66f, #09f, lime, #f39, #66f);
+	-webkit-background-clip: text;
+	background-clip: text;
+	color: transparent !important;
+	animation: rainbow_animation 6s ease-in-out infinite;
+	background-size: 400% 100%
+}
+
+@keyframes rainbow_animation {
+	0%,
+	100% {
+		background-position: 0 0
+	}
+	50% {
+		background-position: 100% 0
+	}
+}
+
+@-webkit-keyframes rainbow_animation {
+	0%,
+	100% {
+		background-position: 0 0
+	}
+	50% {
+		background-position: 100% 0
+	}
+}
+
+@-moz-keyframes rainbow_animation {
+	0%,
+	100% {
+		background-position: 0 0
+	}
+	50% {
+		background-position: 100% 0
+	}
+}
+
+.particle {
+	position: absolute;
+	will-change: transform;
+	pointer-events: none;
+}

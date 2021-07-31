@@ -1,5 +1,6 @@
 .dashboard {
-    background-color: #fbcf59;
+  background: rgb(251,207,89);
+	background: linear-gradient(133deg, rgba(251,207,89,1) 50%, #53ca42 100%);
     min-height: 100vh;
     display: flex;
     flex-direction: column;

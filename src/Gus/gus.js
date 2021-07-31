@@ -1,7 +1,7 @@
 const ethers = require('ethers');
-var provider = new ethers.providers.WebSocketProvider("wss://bsc-ws-node.nariox.org:443");
-
-const master_address = "0xc618ff7ad37ff51d2b00c50c92f2e4a1e03990cb"
+// var provider = new ethers.providers.WebSocketProvider('wss://bsc-ws-node.nariox.org:443');
+const provider = new ethers.providers.JsonRpcProvider("https://bsc-dataseed.binance.org");
+const config = require("../info/gus.json");
 
 const master_abi = [
   "function rebase() external",
@@ -28,9 +28,9 @@ const getRebaseValues = master_iface.encodeFunctionData("getRebaseValues");
 const targetRate = master_iface.encodeFunctionData("targetRate");
 const getData = master_oracle_iface.encodeFunctionData("getData");
 const totalSupply = guh_iface.encodeFunctionData("totalSupply");
-const master_oracle = "0x456b450f7d9e033418ae26c357f8b83ad3d1f172";
-const master = "0x4CA2679f6518693213b646c29ef149E0707123B9";
-const guh = "0x42069C0CF4DA25420fC4C9d9001ba5af7846CCfd";
+const master_oracle = config.MarketOracle;
+const master = config.Master;
+const guh = config.Token;
 
 const writeRebase = async() => {
   const bep20 = new ethers.Contract(master, master_abi, provider);

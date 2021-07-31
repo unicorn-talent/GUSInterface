@@ -3,20 +3,20 @@ import { makeStyles} from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
-import {Button, TextField} from '@material-ui/core';
+import {Button, Hidden} from '@material-ui/core';
 import HelpOutlinedIcon from '@material-ui/icons/HelpOutlined';
 import ReactApexChart from 'react-apexcharts';
 import Tooltip from '@material-ui/core/Tooltip';
-import { MetaMaskProvider, useMetaMask } from "metamask-react";
+import { useMetaMask } from "metamask-react";
 
-import toon from '../assets/images/toon.png';
-import img1 from '../assets/images/blob1.png';
-import img2 from '../assets/images/blob2.png';
-import img3 from '../assets/images/blob3.png';
-import img4 from '../assets/images/blob4.png';
-import img5 from '../assets/images/blob5.png';
-import img6 from '../assets/images/blob6.png';
-import img7 from '../assets/images/blob7.png';
+import toon from '../images/toon.png';
+import img1 from '../images/blob1.png';
+import img2 from '../images/blob2.png';
+import img3 from '../images/blob3.png';
+import img4 from '../images/blob4.png';
+import img5 from '../images/blob5.png';
+import img6 from '../images/blob6.png';
+import img7 from '../images/blob7.png';
 import '../css/dashboard.css'
 import { green } from '@material-ui/core/colors';
 
@@ -154,17 +154,18 @@ const Dashboard = () => {
   const [transactions, setTransactions] = useState([]);
   
   useEffect(() => {
-    fetch('https://api.bscscan.com/api?module=account&action=txlist&address=0x4ca2679f6518693213b646c29ef149e0707123b9&apikey=T8X5MHYDFRQJTSIUG58UBY3Y6Y8AI8R6QG&startBlock=9409241')
+    if (initial_flag == 0) initial_flag = 1; {
+      fetch('https://api.bscscan.com/api?module=account&action=txlist&address=0xc618ff7ad37ff51d2b00c50c92f2e4a1e03990cb&apikey=9C7HPUNMWZYI5A5GIRHIURA37VAF4DNQ14&startBlock=9247103')
       .then(response => response.json())
       .then(data => {
         setTransactions(data.result);
       });
+    }    
 
-    console.log(status);
     if (status == "notConnected") setHoldings(<Button variant="contained" className={classes.button} onClick={connect}>Connet Wallet</Button>)
     else  if (status == 'connected') setMyaddress(account);
 
-  },[status, holdings, myaddress]);
+  },[status]);
   
 
   const rebaseTimeCallback = (timestamp) => {    
@@ -179,11 +180,19 @@ const Dashboard = () => {
   }
 
   const targetRateCallback = (target_rate) => {
-    setCurrentPeg(Math.round(ethers.utils.formatEther(target_rate.toString())/21*20));
+    // setCurrentPeg(Math.round(ethers.utils.formatEther(target_rate.toString())/21*20));
+    var res = (ethers.utils.formatEther(target_rate.toString())/21*20);
+    if (res < 10) res = (res * 1).toFixed(9);
+    else res = Math.round(res);
+    setCurrentPeg(res);
   }
 
   const dataCallback = (data) => {
-    setOraclePrice(Math.round(ethers.utils.formatEther(data.toString())));
+    // setOraclePrice(Math.round(ethers.utils.formatEther(data.toString())));
+    var res = (ethers.utils.formatEther(data.toString()));
+    if (res < 10) res = (res * 1).toFixed(9);
+    else res = Math.round(res);
+    setOraclePrice(res);
   }
 
   const totalSupplyCallback = (total_supply) => {
@@ -212,7 +221,7 @@ const Dashboard = () => {
   useInterval(() => {
     rebaseTimeCalc(); 
     getInfo(rebaseTimeCallback, rebaseValueCallback, targetRateCallback, dataCallback, totalSupplyCallback, balanceOfCallback, myaddress);
-  }, 1000);
+  }, 10000);
 
   return (
 
@@ -220,12 +229,14 @@ const Dashboard = () => {
     <div className="dashboard">
       <h1 style={{color: 'white'}}>GUS Dashboard</h1>
       <Grid container spacing={2}>
-        <Grid item xs={3}>
-          <img src={toon} alt="toon" style={{ width: '50%', height:'50%'}}/>
-        </Grid>
-        <Grid item xs={6}>
+        <Hidden mdDown>
+          <Grid item xs={3}>
+            <img src={toon} alt="toon" style={{ width: '50%'}}/>
+          </Grid>
+        </Hidden>
+        <Grid item xs={12} md={6}>
           <Grid container spacing={2}>
-            <Grid item xs={6}>
+            <Grid item xs={12} md={6}>
               <Card>
                 <CardContent className={classes.content}>
                   <div style={{ position: 'absolute', top: '-3rem', right: 0}}>
@@ -246,7 +257,7 @@ const Dashboard = () => {
                 </CardContent>
               </Card>
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={12} md={6}>
               <Card>
                 <CardContent className={classes.content}>
                   <div style={{ position: 'absolute', top: '-2rem', left: 0}}>
@@ -267,7 +278,7 @@ const Dashboard = () => {
                 </CardContent>
               </Card>
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={12} md={6}>
               <Card>
                 <CardContent className={classes.content}>
                   <div style={{ position: 'absolute', top: '-2rem', left: 0}}>
@@ -285,7 +296,7 @@ const Dashboard = () => {
                 </CardContent>
               </Card>
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={12} md={6}>
               <Card>
                 <CardContent className={classes.content}>
                   <div style={{ position: 'absolute', top: '-2rem', right: 0}}>
@@ -303,7 +314,7 @@ const Dashboard = () => {
                 </CardContent>
               </Card>
             </Grid>
-            <Grid item xs={6}>
+            <Grid item  xs={12} md={6}>
               <Card>
                 <CardContent className={classes.content}>
                   <div style={{ position: 'absolute', top: '-2rem', left: 0}}>
@@ -321,7 +332,7 @@ const Dashboard = () => {
                 </CardContent>
               </Card>
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={12} md={6}>
               <Card>
                 <CardContent className={classes.content}>
                   <div style={{ position: 'absolute', top: '-2rem', right: 0}}>
@@ -339,7 +350,7 @@ const Dashboard = () => {
                 </CardContent>
               </Card>
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={12} md={6}>
               <Card>
                 <CardContent className={classes.content}>
                   <div style={{ position: 'absolute', top: '-2rem', right: 0}}>
@@ -359,9 +370,11 @@ const Dashboard = () => {
             </Grid>
           </Grid>
         </Grid>        
-        <Grid item xs={3}>
-          <img src={toon} alt="toon" style={{ width: '50%', height:'50%'}}/>
-        </Grid>
+        <Hidden mdDown>
+          <Grid item xs={3}>
+            <img src={toon} alt="toon" style={{ width: '50%'}}/>
+          </Grid>
+        </Hidden>
       </Grid>
       <section className={classes.section}>
         <h2 style={{textAlign:'left'}}>Price Chart</h2>
@@ -380,7 +393,7 @@ const Dashboard = () => {
                 <a className={classes.addr} href={"https://bscscan.com/tx/" + trans.hash} target="_blank">{trans.hash}</a>
               </div>
               <div style={{paddingLeft: '30px', color:'rgba(55,65,81,1)'}}>
-                <span>{trans.timeStamp}</span>
+                <span>{(new Date(trans.timeStamp * 1000)).toString()}</span>
               </div>
             </div>
           ) )}
