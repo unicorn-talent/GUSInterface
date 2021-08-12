@@ -1,0 +1,10 @@
+{
+  "Token": "0x1f589049db47e57fd34209a2dc4d721aada15f07",
+  "Master": "0xc618ff7ad37ff51d2b00c50c92f2e4a1e03990cb",
+  "MarketOracle": "0xc9564d264cd8ea04d614756beb49979c5ca2a819",
+  "MarketOracleBTC": "0xb876a152714cfcc30c5ae36fe810db448c230cc2",
+  "GUS_BNB": "0x6e0c23ca0b904837dcc5ba7242440a5e99b202f7",
+  "WBNB_BUSD": "0x58F876857a02D6762E0101bb5C46A8c1ED44Dc16",
+  "BTCB_BNB": "0x61eb789d75a95caa3ff50ed7e47b96c132fec082",
+  "TokenGeyser": "0xfFBD569f1A5e681429D5CfBe9aa372c6745813cc"
+}
